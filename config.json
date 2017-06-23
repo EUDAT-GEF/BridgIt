@@ -1,0 +1,5 @@
+{
+  "StaticContent": "./data/",
+  "PortNumber": "8080",
+  "TimeOut": 1000
+}
