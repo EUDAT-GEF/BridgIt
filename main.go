@@ -6,13 +6,22 @@ import (
 )
 
 const configFilePath = "config.json"
+const appName = "BridgIt"
+const appVersion = "0.1"
+const appDescription = "This is Bridgit, a liaison between Weblicht and the GEF"
+var Config Configuration
 
-func main() {
-	config, err := ReadConfigFile(configFilePath)
+func initApp() Configuration {
+	Config, err := ReadConfigFile(configFilePath)
 	if err != nil {
 		log.Fatal("FATAL: ", err)
 	}
+	return Config
+}
 
-	router := NewRouter(config)
-	log.Fatal(http.ListenAndServe(":"+config.PortNumber, router))
+func main() {
+	Config = initApp()
+
+	router := NewRouter()
+	log.Fatal(http.ListenAndServe(":"+Config.PortNumber, router))
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewRouter(config Configuration) *mux.Router {
+func NewRouter() *mux.Router {
 
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
@@ -24,7 +24,7 @@ func NewRouter(config Configuration) *mux.Router {
 	}
 
 	// Serving static content (Weblicht service results)
-	fs := http.FileServer(http.Dir(config.StaticContent))
+	fs := http.FileServer(http.Dir(Config.StaticContent))
 	staticHandler := Logger(fs, "Serving static content")
 	router.
 		Methods("GET").
