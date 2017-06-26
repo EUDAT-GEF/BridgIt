@@ -1,16 +1,15 @@
 package main
 
 import (
-
 	"fmt"
 
 	"io/ioutil"
 	"net/http"
 
+	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
-	"encoding/json"
 )
 
 type Response struct {
@@ -119,27 +118,32 @@ func jmap(kv ...interface{}) map[string]interface{} {
 	return m
 }
 
-
 func Index(w http.ResponseWriter, r *http.Request) {
 	Response{w}.Ok(jmap("name", appName, "version", appVersion, "Description", appDescription))
 }
 
 func JobStart(w http.ResponseWriter, r *http.Request) {
+	// Receiving a file
 	buf, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		log.Fatal("request", err)
 	}
 
+	// Saving the file to serve it to the next Weblicht service
 	savedFileName := filepath.Join(Config.StaticContent, PseudoUUID())
 	f, err := os.Create(savedFileName)
-
 	defer f.Close()
 	_, err = f.Write(buf)
 	if err != nil {
 		log.Fatal("Error while writing in a file", err)
 	}
 
-	//w.Header().Set("Content-Type", "application")
 	w.Write(buf)
+
+	// Making a request to GEF
+	j, err := StartGEFJob("74ad823e-f2a1-46e8-b2bc-f5941101bca0", "http://localhost:8080/static/BB67B095-6E9D-9351-573C-5E4649A5B01D-1498212238")
+	fmt.Println("Results", j)
+	fmt.Println(err)
+	fmt.Println(j)
 
 }

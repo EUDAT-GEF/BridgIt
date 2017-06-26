@@ -1,15 +1,20 @@
 package main
 
 import (
-	"fmt"
-	"time"
 	"crypto/rand"
-	"os"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"os"
 	"strconv"
+	"strings"
+	"time"
+
+	"crypto/tls"
 )
 
-func PseudoUUID() (string) {
+func PseudoUUID() string {
 
 	b := make([]byte, 16)
 	_, err := rand.Read(b)
@@ -46,4 +51,48 @@ func ReadConfigFile(configFilepath string) (Configuration, error) {
 	}
 
 	return config, nil
+}
+
+// StartGEFJob starts a new job in the GEF
+func StartGEFJob(serviceID string, pid string) (string, error) {
+	// Ignoring certificate verification
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	hc := http.Client{Transport: tr}
+
+	routerURL := Config.GEFAddress + "/api/jobs" // GEF endpoint
+	// Creating a form
+	form := url.Values{}
+	form.Add("serviceID", serviceID)
+	form.Add("pid", pid)
+
+	// POSTing the request
+	req, err := http.NewRequest("POST", routerURL, strings.NewReader(form.Encode()))
+	if err != nil {
+		return "", err
+	}
+	req.PostForm = form
+	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+	// Processing the reply
+	resp, err := hc.Do(req)
+	if err != nil {
+		return "", err
+	}
+	var jsonReply map[string]interface{}
+	// We need to read JSON that normally contains a jobID
+	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
+	if err != nil {
+		return "", err
+	}
+
+	if val, ok := jsonReply["jobID"]; ok {
+		fmt.Println(val)
+		if jobID, ok := val.(string); ok {
+			return jobID, nil
+		}
+	}
+
+	return "", Err(err, "Failed to convert the output to string")
 }

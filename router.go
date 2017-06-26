@@ -26,6 +26,7 @@ func NewRouter() *mux.Router {
 	// Serving static content (Weblicht service results)
 	fs := http.FileServer(http.Dir(Config.StaticContent))
 	staticHandler := Logger(fs, "Serving static content")
+
 	router.
 		Methods("GET").
 		PathPrefix("/static").
