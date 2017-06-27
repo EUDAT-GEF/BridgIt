@@ -141,9 +141,15 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf)
 
 	// Making a request to GEF
-	j, err := StartGEFJob("74ad823e-f2a1-46e8-b2bc-f5941101bca0", "http://localhost:8080/static/BB67B095-6E9D-9351-573C-5E4649A5B01D-1498212238")
-	fmt.Println("Results", j)
-	fmt.Println(err)
-	fmt.Println(j)
+	jobID, err := StartGEFJob("74ad823e-f2a1-46e8-b2bc-f5941101bca0", "http://134.2.129.184:8080/static/BB67B095-6E9D-9351-573C-5E4649A5B01D-1498212238")
+
+	if err == nil {
+		volumeID, err := GetOutputVolumeID(jobID)
+		fmt.Println("Volume info")
+		fmt.Println(volumeID)
+		fmt.Println(err)
+		fmt.Println(err)
+	}
+
 
 }
