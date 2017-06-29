@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"crypto/tls"
+	"path/filepath"
 )
 
 func PseudoUUID() string {
@@ -244,8 +245,8 @@ func GetVolumeFile(volumeID string) (string, error) {
 
 	if len(jsonReply.VolumeContent)>0 {
 		fmt.Println(jsonReply.VolumeContent[0].Name)
+		return filepath.Join(volumeID, jsonReply.VolumeContent[0].Path, jsonReply.VolumeContent[0].Name), nil
 	}
-	fmt.Println(err)
 
 
 
@@ -260,7 +261,8 @@ func GetVolumeFile(volumeID string) (string, error) {
 
 
 
-	return "", nil
+
+	return "", err
 
 }
 
@@ -292,5 +294,5 @@ func GetOutputFile(jobID string) (string, error) {
 	fmt.Println(fileName)
 	fmt.Println(err)
 
-	return "", nil
+	return Config.GEFAddress + "/api/volumes/" + fileName + "?content", nil
 }
