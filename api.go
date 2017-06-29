@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"github.com/pborman/uuid"
 )
 
 type Response struct {
@@ -129,8 +130,10 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("request", err)
 	}
 
+	uniqueName := uuid.New()
+
 	// Saving the file to serve it to the next Weblicht service
-	savedFileName := filepath.Join(Config.StaticContent, PseudoUUID())
+	savedFileName := filepath.Join(Config.StaticContent, uniqueName)
 	f, err := os.Create(savedFileName)
 	defer f.Close()
 	_, err = f.Write(buf)
@@ -141,14 +144,18 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 	w.Write(buf)
 
 	// Making a request to GEF
-	jobID, err := StartGEFJob("74ad823e-f2a1-46e8-b2bc-f5941101bca0", "http://134.2.129.184:8080/static/BB67B095-6E9D-9351-573C-5E4649A5B01D-1498212238")
+	jobID, err := StartGEFJob("74ad823e-f2a1-46e8-b2bc-f5941101bca0", "http://134.2.129.184:8080/static/"+uniqueName)
 
 	if err == nil {
-		volumeID, err := GetOutputVolumeID(jobID)
-		fmt.Println("Volume info")
-		fmt.Println(volumeID)
+
+
+		outputFileLink, err := GetOutputFile(jobID)
+		fmt.Println("outputFileLink")
+		fmt.Println(outputFileLink)
 		fmt.Println(err)
-		fmt.Println(err)
+
+
+
 	}
 
 

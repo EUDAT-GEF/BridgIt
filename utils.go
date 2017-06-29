@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"crypto/tls"
-	"reflect"
 )
 
 func PseudoUUID() string {
@@ -97,8 +96,10 @@ func StartGEFJob(serviceID string, pid string) (string, error) {
 	return "", Err(err, "Failed to convert the output to string")
 }
 
-
-type Job struct {
+type SelectedJob struct {
+	Job SingleJob
+}
+type SingleJob struct {
 	ID           string
 	ServiceID    string
 	Input        string
@@ -126,48 +127,37 @@ type Task struct {
 	ConsoleOutput string
 }
 
-func Keys(v interface{}) ([]string, error) {
-	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Map {
-		return nil, Err(nil, "not a map")
-	}
-	t := rv.Type()
-	if t.Key().Kind() != reflect.String {
-		return nil, Err(nil, "not string key")
-	}
-	var result []string
-	for _, kv := range rv.MapKeys() {
-		result = append(result, kv.String())
-	}
-	return result, nil
-}
 
-func GetJobStateCode(job interface{}) (float64, error) {
-	jobMap := reflect.ValueOf(job)
+func GetJobStateCode(jobID string) (int, error) {
+	// Ignoring certificate verification
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	hc := http.Client{Transport: tr}
 
-	if jobMap.Kind() == reflect.Map {
-		for _, jobKey := range jobMap.MapKeys() {
-			jobItem := jobMap.MapIndex(jobKey)
-			if strings.ToLower(jobKey.String()) == "state" {
-				stateMap := reflect.ValueOf(jobItem.Interface())
+	routerURL := Config.GEFAddress + "/api/jobs/"+ jobID // GEF endpoint
 
-				if stateMap.Kind() == reflect.Map {
-					for _, stateKey := range stateMap.MapKeys() {
-						state := stateMap.MapIndex(stateKey)
-						if strings.ToLower(stateKey.String()) == "code" {
-							if val, ok := state.Interface().(float64); ok {
-								return val, nil
-							} else {
-								return 0, Err(nil, "Failed to convert the output to float64")
-							}
-						}
-					}
-				}
-			}
-		}
+	// Sending a GET request
+	req, err := http.NewRequest("GET", routerURL, nil)
+	if err != nil {
+		return 0, err
 	}
 
-	return 0, nil
+	resp, err := hc.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	//var jsonReply map[string]interface{}
+	var jsonReply SelectedJob
+
+	// We need to read JSON that normally contains a volumeID
+	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
+	if err != nil {
+		return 0, err
+	}
+
+	fmt.Println(jsonReply.Job.State.Code)
+	return jsonReply.Job.State.Code, nil
 }
 
 func GetOutputVolumeID(jobID string) (string, error) {
@@ -186,32 +176,121 @@ func GetOutputVolumeID(jobID string) (string, error) {
 	}
 
 	resp, err := hc.Do(req)
-
-
-	// Processing the reply
-
 	if err != nil {
 		return "", err
 	}
-	var jsonReply map[string]interface{}
+	//var jsonReply map[string]interface{}
 
+	var jsonReply SelectedJob
 	// We need to read JSON that normally contains a volumeID
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(jsonReply)
-	fmt.Println("JOB = ")
-	if job, ok := jsonReply["Job"]; ok {
-		
-		fmt.Println(job)
 
 
-		fmt.Println("CODE = ")
-		fmt.Println(GetJobStateCode(job))
+	fmt.Println(jsonReply.Job.OutputVolume)
+	return jsonReply.Job.OutputVolume, nil
+}
+type VolumeInspection struct {
+	VolumeContent []VolumeItem
+}
 
+type VolumeItem struct {
+	Name       string       `json:"name"`
+	Size       int64        `json:"size"`
+	Modified   time.Time    `json:"modified"`
+	IsFolder   bool         `json:"isFolder"`
+	Path   	   string       `json:"path"`
+	FolderTree []VolumeItem `json:"folderTree"`
+}
+
+func GetVolumeFile(volumeID string) (string, error) {
+	// Ignoring certificate verification
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	hc := http.Client{Transport: tr}
+
+	routerURL := Config.GEFAddress + "/api/volumes/"+ volumeID + "/" // GEF endpoint
+
+	// Sending a GET request
+	req, err := http.NewRequest("GET", routerURL, nil)
+	if err != nil {
+		return "", err
 	}
 
+	resp, err := hc.Do(req)
+	if err != nil {
+		return "", err
+	}
+	//var jsonReply map[string]interface{}
+	var jsonReply VolumeInspection
 
-	return "", Err(err, "Failed to convert the output to string")
+
+	//jsonReceived, err := ioutil.ReadAll(resp.Body)
+	//if err != nil {
+	//
+	//}
+
+
+	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
+
+
+
+
+	fmt.Println(jsonReply)
+	fmt.Println(jsonReply.VolumeContent)
+
+	if len(jsonReply.VolumeContent)>0 {
+		fmt.Println(jsonReply.VolumeContent[0].Name)
+	}
+	fmt.Println(err)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	return "", nil
+
+}
+
+
+func GetOutputFile(jobID string) (string, error) {
+
+
+	for {
+		jobExitCode, err := GetJobStateCode(jobID)
+		fmt.Println(jobExitCode)
+		if jobExitCode >-1 {
+			if err != nil {
+				return "", err
+			}
+			break
+		}
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	volumeID, err := GetOutputVolumeID(jobID)
+	if err != nil {
+		return "", err
+	}
+	fmt.Println("VolumeID = ")
+	fmt.Println(volumeID)
+
+	fileName, err := GetVolumeFile(volumeID)
+	fmt.Println("Volume File = ")
+	fmt.Println(fileName)
+	fmt.Println(err)
+
+	return "", nil
 }
