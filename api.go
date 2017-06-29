@@ -7,10 +7,10 @@ import (
 	"net/http"
 
 	"encoding/json"
+	"github.com/pborman/uuid"
 	"log"
 	"os"
 	"path/filepath"
-	"github.com/pborman/uuid"
 )
 
 type Response struct {
@@ -146,17 +146,18 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 	// Making a request to GEF
 	jobID, err := StartGEFJob("74ad823e-f2a1-46e8-b2bc-f5941101bca0", "http://134.2.129.184:8080/static/"+uniqueName)
 
-	if err == nil {
-
-
-		outputFileLink, err := GetOutputFile(jobID)
-		fmt.Println("outputFileLink")
-		fmt.Println(outputFileLink)
-		fmt.Println(err)
-
-
-
+	if err != nil {
+		log.Fatal("Error while starting a new job", err)
 	}
+
+	outputFileLink, err := GetOutputFile(jobID)
+	if err != nil {
+		log.Fatal("Error while getting a link to the output file", err)
+	}
+	fmt.Println("Output file can be downloaded at:")
+	fmt.Println(outputFileLink)
+
+
 
 
 }

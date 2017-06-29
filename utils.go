@@ -1,35 +1,17 @@
 package main
 
 import (
-	"crypto/rand"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
 	"crypto/tls"
+	"log"
 	"path/filepath"
 )
-
-func PseudoUUID() string {
-
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err != nil {
-		fmt.Println("Error: ", err)
-		return ""
-	}
-
-	uuid := fmt.Sprintf("%X-%X-%X-%X-%X", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
-	unixTime := int64(time.Now().Unix())
-	uniqueName := uuid + "-" + strconv.FormatInt(unixTime, 10)
-
-	return uniqueName
-}
 
 // ReadConfigFile reads a configuration file
 func ReadConfigFile(configFilepath string) (Configuration, error) {
@@ -56,6 +38,7 @@ func ReadConfigFile(configFilepath string) (Configuration, error) {
 
 // StartGEFJob starts a new job in the GEF
 func StartGEFJob(serviceID string, pid string) (string, error) {
+	log.Println("Starting a new job for the service " + serviceID + " with the PID " + pid)
 	// Ignoring certificate verification
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -76,13 +59,13 @@ func StartGEFJob(serviceID string, pid string) (string, error) {
 	req.PostForm = form
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
-	// Processing the reply
 	resp, err := hc.Do(req)
 	if err != nil {
 		return "", err
 	}
-	var jsonReply map[string]interface{}
+
 	// We need to read JSON that normally contains a jobID
+	var jsonReply map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return "", err
@@ -97,46 +80,17 @@ func StartGEFJob(serviceID string, pid string) (string, error) {
 	return "", Err(err, "Failed to convert the output to string")
 }
 
-type SelectedJob struct {
-	Job SingleJob
-}
-type SingleJob struct {
-	ID           string
-	ServiceID    string
-	Input        string
-	Created      time.Time
-	State        *JobState
-	InputVolume  string
-	OutputVolume string
-	Tasks        []Task
-}
-
-// JobState keeps information about a job state
-type JobState struct {
-	Status string
-	Error  string
-	Code   int
-}
-
-// Task contains tasks related to a specific job (used to serialize JSON)
-type Task struct {
-	ID            string
-	Name          string
-	ContainerID   string
-	Error         string
-	ExitCode      int
-	ConsoleOutput string
-}
-
-
+// GetJobStateCode returns the job exit code (-1 running, 0 ended successfully, 1 failed)
 func GetJobStateCode(jobID string) (int, error) {
+	//log.Println("Reading the state of the job " + jobID)
+
 	// Ignoring certificate verification
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	hc := http.Client{Transport: tr}
 
-	routerURL := Config.GEFAddress + "/api/jobs/"+ jobID // GEF endpoint
+	routerURL := Config.GEFAddress + "/api/jobs/" + jobID // GEF endpoint
 
 	// Sending a GET request
 	req, err := http.NewRequest("GET", routerURL, nil)
@@ -148,7 +102,6 @@ func GetJobStateCode(jobID string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	//var jsonReply map[string]interface{}
 	var jsonReply SelectedJob
 
 	// We need to read JSON that normally contains a volumeID
@@ -157,18 +110,19 @@ func GetJobStateCode(jobID string) (int, error) {
 		return 0, err
 	}
 
-	fmt.Println(jsonReply.Job.State.Code)
 	return jsonReply.Job.State.Code, nil
 }
 
+// GetOutputVolumeID returns the output volume ID for the given job
 func GetOutputVolumeID(jobID string) (string, error) {
+	log.Println("Retrieving the output volume ID for the job " + jobID)
 	// Ignoring certificate verification
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	hc := http.Client{Transport: tr}
 
-	routerURL := Config.GEFAddress + "/api/jobs/"+ jobID // GEF endpoint
+	routerURL := Config.GEFAddress + "/api/jobs/" + jobID // GEF endpoint
 
 	// Sending a GET request
 	req, err := http.NewRequest("GET", routerURL, nil)
@@ -180,40 +134,26 @@ func GetOutputVolumeID(jobID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	//var jsonReply map[string]interface{}
 
 	var jsonReply SelectedJob
-	// We need to read JSON that normally contains a volumeID
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return "", err
 	}
 
-
-	fmt.Println(jsonReply.Job.OutputVolume)
 	return jsonReply.Job.OutputVolume, nil
 }
-type VolumeInspection struct {
-	VolumeContent []VolumeItem
-}
 
-type VolumeItem struct {
-	Name       string       `json:"name"`
-	Size       int64        `json:"size"`
-	Modified   time.Time    `json:"modified"`
-	IsFolder   bool         `json:"isFolder"`
-	Path   	   string       `json:"path"`
-	FolderTree []VolumeItem `json:"folderTree"`
-}
-
+// GetVolumeFile inspects the output volume and return a path to the output file
 func GetVolumeFile(volumeID string) (string, error) {
+	log.Println("Reading the output volume " + volumeID)
 	// Ignoring certificate verification
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	hc := http.Client{Transport: tr}
 
-	routerURL := Config.GEFAddress + "/api/volumes/"+ volumeID + "/" // GEF endpoint
+	routerURL := Config.GEFAddress + "/api/volumes/" + volumeID + "/" // GEF endpoint
 
 	// Sending a GET request
 	req, err := http.NewRequest("GET", routerURL, nil)
@@ -225,55 +165,25 @@ func GetVolumeFile(volumeID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	//var jsonReply map[string]interface{}
+
 	var jsonReply VolumeInspection
-
-
-	//jsonReceived, err := ioutil.ReadAll(resp.Body)
-	//if err != nil {
-	//
-	//}
-
 
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 
-
-
-
-	fmt.Println(jsonReply)
-	fmt.Println(jsonReply.VolumeContent)
-
-	if len(jsonReply.VolumeContent)>0 {
-		fmt.Println(jsonReply.VolumeContent[0].Name)
+	if len(jsonReply.VolumeContent) > 0 {
 		return filepath.Join(volumeID, jsonReply.VolumeContent[0].Path, jsonReply.VolumeContent[0].Name), nil
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	return "", err
-
 }
 
-
+// GetOutputFile returns a link to the first file (Weblicht service will always produce only one file) from the output volume
 func GetOutputFile(jobID string) (string, error) {
-
-
+	log.Println("Retrieving a link to the output file from the job " + jobID)
 	for {
 		jobExitCode, err := GetJobStateCode(jobID)
-		fmt.Println(jobExitCode)
-		if jobExitCode >-1 {
+		//fmt.Println(jobExitCode)
+		if jobExitCode > -1 {
 			if err != nil {
 				return "", err
 			}
@@ -286,13 +196,11 @@ func GetOutputFile(jobID string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("VolumeID = ")
-	fmt.Println(volumeID)
 
 	fileName, err := GetVolumeFile(volumeID)
-	fmt.Println("Volume File = ")
-	fmt.Println(fileName)
-	fmt.Println(err)
+	if err != nil {
+		return "", err
+	}
 
 	return Config.GEFAddress + "/api/volumes/" + fileName + "?content", nil
 }

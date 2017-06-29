@@ -24,5 +24,6 @@ func main() {
 	Config = initApp()
 
 	router := NewRouter()
+	log.Println("Starting the service at port " + Config.PortNumber)
 	log.Fatal(http.ListenAndServe(":"+Config.PortNumber, router))
 }
