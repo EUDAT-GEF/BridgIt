@@ -20,9 +20,11 @@ type SelectedJob struct {
 // SingleJob is a single job object
 type SingleJob struct {
 	ID           string
+	ConnectionID int
 	ServiceID    string
 	Input        string
 	Created      time.Time
+	Duration     int64
 	State        *JobState
 	InputVolume  string
 	OutputVolume string
