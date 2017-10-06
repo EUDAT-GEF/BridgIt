@@ -4,12 +4,12 @@ import "time"
 
 // Configuration keeps all settings
 type Configuration struct {
-	StaticContentFolder string
+	StaticContentFolder    string
 	StaticContentURLPrefix string
-	StorageURL string
-	GEFAddress    string
-	PortNumber    string
-	TimeOut       int64
+	StorageURL             string
+	GEFAddress             string
+	PortNumber             string
+	TimeOut                int64
 }
 
 // SelectedJob is the format of JSON returned by GEF when inspecting a job

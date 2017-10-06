@@ -1,7 +1,7 @@
 {
   "StaticContentFolder": "./data/",
   "StaticContentURLPrefix": "/static",
-  "StorageURL": "http://134.2.129.184:8080",
+  "StorageURL": "http://134.2.129.184",
   "GEFAddress": "https://localhost:8443",
   "PortNumber": "8080",
   "TimeOut": 1000
