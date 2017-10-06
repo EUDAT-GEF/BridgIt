@@ -5,7 +5,7 @@ Liaison between WebLicht and the GEF-enabled services
 
 The GEF
 -------
-[![Build Status](https://travis-ci.org/EUDAT-GEF/GEF.svg?branch=master)](https://github.com/EUDAT-GEF/BridgIt)
+[![Build Status](https://travis-ci.org/EUDAT-GEF/GEF.svg?branch=master)](https://travis-ci.org/EUDAT-GEF/BridgIt)
 
 The GEF (Generic Execution Framework) is available at: https://github.com/EUDAT-GEF/GEF
 
