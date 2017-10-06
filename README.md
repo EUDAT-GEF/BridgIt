@@ -27,7 +27,7 @@ Configuration File
 {
   "StaticContentFolder": "./data/",
   "StaticContentURLPrefix": "/static",
-  "StorageURL": HTTP://IP_ADDRESS_AND_PORT_OF_BRIDGIT,
+  "StorageURL": HTTP://IP_ADDRESS_OF_BRIDGIT,
   "GEFAddress": HTTPS://IP_ADDRESS_AND_PORT_OF_GEF,
   "StoragePortNumber": BRIDGIT_PORT,
   "TimeOut": 1000,
