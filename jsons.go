@@ -7,9 +7,10 @@ type Configuration struct {
 	StaticContentFolder    string
 	StaticContentURLPrefix string
 	StorageURL             string
+	StoragePortNumber      string
 	GEFAddress             string
-	PortNumber             string
 	TimeOut                int64
+	Apps                   map[string]string
 }
 
 // SelectedJob is the format of JSON returned by GEF when inspecting a job

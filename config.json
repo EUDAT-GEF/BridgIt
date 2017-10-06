@@ -1,8 +1,12 @@
 {
   "StaticContentFolder": "./data/",
   "StaticContentURLPrefix": "/static",
-  "StorageURL": "http://134.2.129.184",
+  "StorageURL": "http://localhost",
+  "StoragePortNumber": "8080",
   "GEFAddress": "https://localhost:8443",
-  "PortNumber": "8080",
-  "TimeOut": 1000
+  "TimeOut": 1000,
+  "Apps": {
+    "nltk": "91207aa2-5fb4-440d-bce0-79fb6027d928",
+    "stanford": "ce5203bb-f161-49af-83e5-4486e408fce5"
+  }
 }

@@ -11,6 +11,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	//"bufio"
 )
 
 type Response struct {
@@ -124,55 +125,66 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func JobStart(w http.ResponseWriter, r *http.Request) {
-	var serviceID []string
+	var serviceName []string
 	var accessToken []string
+	var inputFile []string
 	var ok bool
 
-	if serviceID, ok = r.URL.Query()["service"]; !ok {
-		Response{w}.ServerError("Could not extract service ID from the request URL", nil)
+	if serviceName, ok = r.URL.Query()["service"]; !ok {
+		Response{w}.ServerError("Could not extract a service ID from the request URL", nil)
+		return
 	}
 
 	if accessToken, ok = r.URL.Query()["token"]; !ok {
-		Response{w}.ServerError("Could not extract access token from the request URL", nil)
+		Response{w}.ServerError("Could not extract an access token from the request URL", nil)
+		return
 	}
 
-	if (len(serviceID) > 0) && (len(accessToken) > 0) {
-		// Receiving a file
-		buf, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			Response{w}.ServerError("Error while receiving a file", err)
-		}
-
-		uniqueName := uuid.New()
-
-		// Saving the file to serve it to the next Weblicht service
-		savedFileName := filepath.Join(Config.StaticContentFolder, uniqueName)
-		f, err := os.Create(savedFileName)
-		defer f.Close()
-		_, err = f.Write(buf)
-		if err != nil {
-			Response{w}.ServerError("Error while writing in a file", err)
-		}
-
-		// Making a request to the GEF instance specified in the config file
-		jobID, err := StartGEFJob(serviceID[0], accessToken[0], Config.StorageURL+":"+Config.PortNumber+Config.StaticContentURLPrefix+"/"+uniqueName)
-
-		if err != nil {
-			Response{w}.ServerError("Error while starting a new job", err)
-		}
-
-		outputFileLink, err := GetOutputFileURL(accessToken[0], jobID)
-		if err != nil {
-			Response{w}.ServerError("Error while getting a link to the output file", err)
-		}
-
-		outputBuf, err := ReadOutputFile(outputFileLink)
-		if err != nil {
-			Response{w}.ServerError("Error while reading the output file", err)
-		}
-		w.Write(outputBuf)
-	} else {
-		Response{w}.ServerError("Service ID or access token is empty", nil)
+	if inputFile, ok = r.URL.Query()["input"]; !ok {
+		Response{w}.ServerError("Could not extract an input file name from the request URL", nil)
+		return
 	}
 
+	content, err := ioutil.ReadFile(inputFile[0])
+	uniqueName := uuid.New()
+
+	// Saving the file to serve it to the next Weblicht service
+	savedFileName := filepath.Join(Config.StaticContentFolder, uniqueName)
+	f, err := os.Create(savedFileName)
+	defer f.Close()
+	_, err = f.Write(content)
+	if err != nil {
+		Response{w}.ServerError("Error while writing in a file", err)
+	}
+
+	var serviceID string
+	for k := range Config.Apps {
+		if k == serviceName[0] {
+			serviceID = Config.Apps[k]
+		}
+	}
+	if len(serviceID) == 0 {
+		Response{w}.ServerError("Service ID was not found", nil)
+	}
+
+	// Making a request to the GEF instance specified in the config file
+	jobID, err := StartGEFJob(serviceID, accessToken[0], Config.StorageURL+":"+Config.StoragePortNumber+Config.StaticContentURLPrefix+"/"+uniqueName)
+
+	if err != nil {
+		Response{w}.ServerError("Error while starting a new job", err)
+	}
+
+	outputFileLink, err := GetOutputFileURL(accessToken[0], jobID)
+	if err != nil {
+		Response{w}.ServerError("Error while getting a link to the output file", err)
+	}
+
+	outputBuf, err := ReadOutputFile(outputFileLink)
+	if err != nil {
+		Response{w}.ServerError("Error while reading the output file", err)
+	}
+	outputType := http.DetectContentType(outputBuf)
+
+	w.Header().Set("Content-Type", outputType+"+url")
+	w.Write([]byte(outputFileLink))
 }
