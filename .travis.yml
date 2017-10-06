@@ -5,6 +5,8 @@ language: go
 before_install:
   - echo ${TRAVIS_BUILD_DIR}
   - echo ${GOPATH}
-  - curl https://glide.sh/get | sh
+  - go get -u github.com/EUDAT-GEF/GEF
+  - cd $GOPATH/src/github.com/EUDAT-GEF/GEF
+  - make build
 
-script: make build
+script: echo "Hello"
