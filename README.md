@@ -19,7 +19,7 @@ How does it work?
 - Run `./bridgit`
 - Start the GEF
 - Start on the user profile page create a new API token and use it for all requests
-- Try to send a simple request by using CURL: `curl -X POST http://localhost:8080/jobs\?service\=SERVICE_NAME\&token\=B2ACCESS_TOKEN\&input\=INPUT_FILE_PATH -v -o out3.txt`
+- Try to send a simple request by using CURL: `curl -X POST http://localhost:8080/jobs\?service\=SERVICE_NAME\&token\=GEF_ACCESS_TOKEN\&input\=INPUT_FILE_PATH -v -o out3.txt`
 
 Configuration File
 ------------------
