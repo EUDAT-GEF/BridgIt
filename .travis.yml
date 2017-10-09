@@ -10,4 +10,6 @@ install:
   - cd $GOPATH/src/github.com/EUDAT-GEF/GEF
 
 script:
-  - make build
+  - make dependencies
+  - make buildbackend
+  - make webui
