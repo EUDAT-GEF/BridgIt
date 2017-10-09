@@ -6,7 +6,8 @@ install:
   - echo ${TRAVIS_BUILD_DIR}
   - echo ${GOPATH}
   - curl https://glide.sh/get | sh
-  - go get -u github.com/EUDAT-GEF/GEF || exit 0
+  - go get -u github.com/EUDAT-GEF/GEF || true
   - cd $GOPATH/src/github.com/EUDAT-GEF/GEF
 
-script: make build
+script:
+  - make build
