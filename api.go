@@ -187,6 +187,4 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 
 	Response{w}.Header().Set("Content-Type", outputType+"+url")
 	Response{w}.Write([]byte(outputFileLink))
-	//w.Header().Set("Content-Type", outputType+"+url")
-	//w.Write([]byte(outputFileLink))
 }

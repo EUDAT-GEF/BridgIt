@@ -1,12 +1,8 @@
 package main
 
 import (
-	"log"
 	"testing"
-	"github.com/EUDAT-GEF/GEF/gefserver/def"
-	"github.com/EUDAT-GEF/GEF/gefserver/db"
-	"os"
-	"github.com/EUDAT-GEF/GEF/gefserver/pier"
+
 )
 
 func TestClient(t *testing.T) {
