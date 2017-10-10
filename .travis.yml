@@ -8,8 +8,9 @@ install:
   - curl https://glide.sh/get | sh
   - go get -u github.com/EUDAT-GEF/GEF || true
   - cd $GOPATH/src/github.com/EUDAT-GEF/GEF
-
-script:
   - make dependencies
   - make buildbackend
   - make webui
+
+script:
+  - make dependencies

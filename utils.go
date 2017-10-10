@@ -30,9 +30,9 @@ func ReadConfigFile(configFilepath string) (Configuration, error) {
 		return config, Err(err, "Cannot read config file %s", configFilepath)
 	}
 
-	if config.StaticContentFolder == "" {
-		return config, Err(nil, "Empty static content folder name in file: %s", configFilepath)
-	}
+	//if config.StaticContentFolder == "" {
+	//	return config, Err(nil, "Empty static content folder name in file: %s", configFilepath)
+	//}
 
 	return config, nil
 }

@@ -4,10 +4,7 @@ import "time"
 
 // Configuration keeps all settings
 type Configuration struct {
-	StaticContentFolder    string
-	StaticContentURLPrefix string
-	StorageURL             string
-	StoragePortNumber      string
+	PortNumber      string
 	GEFAddress             string
 	TimeOut                int64
 	Apps                   map[string]string

@@ -3,15 +3,10 @@ package main
 import (
 	"fmt"
 
-	"io/ioutil"
 	"net/http"
 
 	"encoding/json"
-	"github.com/pborman/uuid"
 	"log"
-	"os"
-	"path/filepath"
-	//"bufio"
 )
 
 type Response struct {
@@ -145,17 +140,17 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, err := ioutil.ReadFile(inputFile[0])
-	uniqueName := uuid.New()
+	//content, err := ioutil.ReadFile(inputFile[0])
+	//uniqueName := uuid.New()
 
 	// Saving the file to serve it to the next Weblicht service
-	savedFileName := filepath.Join(Config.StaticContentFolder, uniqueName)
-	f, err := os.Create(savedFileName)
-	defer f.Close()
-	_, err = f.Write(content)
-	if err != nil {
-		Response{w}.ServerError("Error while writing in a file", err)
-	}
+	//savedFileName := filepath.Join(Config.StaticContentFolder, uniqueName)
+	//f, err := os.Create(savedFileName)
+	//defer f.Close()
+	//_, err = f.Write(content)
+	//if err != nil {
+	//	Response{w}.ServerError("Error while writing in a file", err)
+	//}
 
 	var serviceID string
 	for k := range Config.Apps {
@@ -168,7 +163,7 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Making a request to the GEF instance specified in the config file
-	jobID, err := StartGEFJob(serviceID, accessToken[0], Config.StorageURL+":"+Config.StoragePortNumber+Config.StaticContentURLPrefix+"/"+uniqueName)
+	jobID, err := StartGEFJob(serviceID, accessToken[0], inputFile[0])
 
 	if err != nil {
 		Response{w}.ServerError("Error while starting a new job", err)
