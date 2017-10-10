@@ -16,7 +16,9 @@ func main() {
 	if err != nil {
 		log.Fatal("FATAL: ", err)
 	}
-	api.StartServer(config)
+	app := api.NewApp(config)
+	app.Start()
+
 
 	//startHttpServer(Config.PortNumber, NewRouter())
 	//

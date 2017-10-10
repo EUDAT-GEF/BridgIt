@@ -138,7 +138,7 @@ type Route struct {
 
 type Routes []Route
 
-func StartServer(cfg config.Configuration) App {
+func NewApp(cfg config.Configuration) App {
 	//router := NewRouter()
 
 
@@ -190,17 +190,20 @@ func StartServer(cfg config.Configuration) App {
 
 	application.Server.Handler = router
 
-	go func() {
-		log.Println(srv.ListenAndServe())
-		//if err := srv.ListenAndServe(); err != nil {
-		//	log.Printf("Httpserver: ListenAndServe() error: %s", err)
-		//}
-	}()
+
 
 
 
 
 	return application
+}
+
+func (a *App) Start() error {
+	return a.Server.ListenAndServe()
+}
+
+func (a *App) Stop() error {
+	return a.Server.ListenAndServe()
 }
 
 func (a *App) Index(w http.ResponseWriter, r *http.Request) {
