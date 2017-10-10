@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"fmt"
@@ -7,11 +7,25 @@ import (
 
 	"encoding/json"
 	"log"
+	"github.com/EUDAT-GEF/Bridgit/config"
+	"github.com/EUDAT-GEF/Bridgit/utils"
+
+	"github.com/gorilla/mux"
 )
 
 type Response struct {
 	http.ResponseWriter
 }
+
+type App struct {
+	Name string
+	Version string
+	Description string
+	Config config.Configuration
+	Server *http.Server
+
+}
+
 
 // ClientError sets a 400 error
 func (w Response) ClientError(message string, err error) {
@@ -115,11 +129,85 @@ func jmap(kv ...interface{}) map[string]interface{} {
 	return m
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	Response{w}.Ok(jmap("name", appName, "version", appVersion, "Description", appDescription))
+type Route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
 }
 
-func JobStart(w http.ResponseWriter, r *http.Request) {
+type Routes []Route
+
+func StartServer(cfg config.Configuration) App {
+	//router := NewRouter()
+
+
+
+
+	log.Println("Starting the service at port " + cfg.PortNumber)
+	srv := &http.Server{Addr: ":"+cfg.PortNumber}
+
+	application := App {
+		Name: "BridgIt",
+		Version: "0.1",
+		Description: "This is Bridgit, a liaison between Weblicht and the GEF",
+		Config: cfg,
+		Server: srv,
+
+	}
+
+	var routes = Routes{
+		Route{
+			"Index",
+			"GET",
+			"/",
+			application.Index,
+		},
+		Route{
+			"JobStart",
+			"POST",
+			"/jobs",
+			application.JobStart,
+		},
+	}
+
+
+	router := mux.NewRouter().StrictSlash(true)
+	for _, route := range routes {
+		var handler http.Handler
+
+		handler = route.HandlerFunc
+		handler = utils.Logger(handler, route.Name)
+
+		router.
+		Methods(route.Method).
+			Path(route.Pattern).
+			Name(route.Name).
+			Handler(handler)
+
+	}
+
+
+	application.Server.Handler = router
+
+	go func() {
+		log.Println(srv.ListenAndServe())
+		//if err := srv.ListenAndServe(); err != nil {
+		//	log.Printf("Httpserver: ListenAndServe() error: %s", err)
+		//}
+	}()
+
+
+
+
+	return application
+}
+
+func (a *App) Index(w http.ResponseWriter, r *http.Request) {
+	Response{w}.Ok(jmap("name", a.Name, "version", a.Version, "Description", a.Description))
+}
+
+func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	var serviceName []string
 	var accessToken []string
 	var inputFile []string
@@ -153,9 +241,9 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 	//}
 
 	var serviceID string
-	for k := range Config.Apps {
+	for k := range a.Config.Apps {
 		if k == serviceName[0] {
-			serviceID = Config.Apps[k]
+			serviceID = a.Config.Apps[k]
 		}
 	}
 	if len(serviceID) == 0 {
@@ -163,18 +251,18 @@ func JobStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Making a request to the GEF instance specified in the config file
-	jobID, err := StartGEFJob(serviceID, accessToken[0], inputFile[0])
+	jobID, err := utils.StartGEFJob(serviceID, accessToken[0], inputFile[0], a.Config.GEFAddress)
 
 	if err != nil {
 		Response{w}.ServerError("Error while starting a new job", err)
 	}
 
-	outputFileLink, err := GetOutputFileURL(accessToken[0], jobID)
+	outputFileLink, err := utils.GetOutputFileURL(accessToken[0], jobID, a.Config.GEFAddress)
 	if err != nil {
 		Response{w}.ServerError("Error while getting a link to the output file", err)
 	}
 
-	outputBuf, err := ReadOutputFile(outputFileLink)
+	outputBuf, err := utils.ReadOutputFile(outputFileLink)
 	if err != nil {
 		Response{w}.ServerError("Error while reading the output file", err)
 	}

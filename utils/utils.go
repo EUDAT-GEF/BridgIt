@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"encoding/json"
@@ -12,11 +12,12 @@ import (
 	"io/ioutil"
 	"log"
 	"path/filepath"
+	"github.com/EUDAT-GEF/Bridgit/config"
 )
 
 // ReadConfigFile reads a configuration file
-func ReadConfigFile(configFilepath string) (Configuration, error) {
-	var config Configuration
+func ReadConfigFile(configFilepath string) (config.Configuration, error) {
+	var config config.Configuration
 
 	file, err := os.Open(configFilepath)
 	if err != nil {
@@ -36,6 +37,7 @@ func ReadConfigFile(configFilepath string) (Configuration, error) {
 
 	return config, nil
 }
+
 
 // TLSHTTPRequest allows to make requests ignoring the check of certificates
 func TLSHTTPRequest(method string, url string, form url.Values) (*http.Response, error) {
@@ -64,14 +66,14 @@ func TLSHTTPRequest(method string, url string, form url.Values) (*http.Response,
 }
 
 // StartGEFJob starts a new job in the GEF
-func StartGEFJob(serviceID string, accessToken string, pid string) (string, error) {
+func StartGEFJob(serviceID string, accessToken string, pid string, GEFAddress string) (string, error) {
 	log.Println("Starting a new job for the service " + serviceID + " with the PID " + pid)
 	// Creating a form
 	form := url.Values{}
 	form.Add("serviceID", serviceID)
 	form.Add("pid", pid)
 
-	resp, err := TLSHTTPRequest("POST", Config.GEFAddress+"/api/jobs?access_token="+accessToken, form)
+	resp, err := TLSHTTPRequest("POST", GEFAddress+"/api/jobs?access_token="+accessToken, form)
 	if err != nil {
 		return "", err
 	}
@@ -93,14 +95,14 @@ func StartGEFJob(serviceID string, accessToken string, pid string) (string, erro
 }
 
 // GetJobStateCode returns the job exit code (-1 running, 0 ended successfully, 1 failed)
-func GetJobStateCode(accessToken string, jobID string) (int, error) {
-	resp, err := TLSHTTPRequest("GET", Config.GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
+func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, error) {
+	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
 	if err != nil {
 		return 0, err
 	}
 
 	// We need to read JSON that normally contains a volumeID
-	var jsonReply SelectedJob
+	var jsonReply config.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return 0, err
@@ -110,14 +112,14 @@ func GetJobStateCode(accessToken string, jobID string) (int, error) {
 }
 
 // GetOutputVolumeID returns the output volume ID for the given job
-func GetOutputVolumeID(accessToken string, jobID string) (string, error) {
+func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (string, error) {
 	log.Println("Retrieving the output volume ID for the job " + jobID)
-	resp, err := TLSHTTPRequest("GET", Config.GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
+	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
 	if err != nil {
 		return "", err
 	}
 
-	var jsonReply SelectedJob
+	var jsonReply config.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return "", err
@@ -127,13 +129,13 @@ func GetOutputVolumeID(accessToken string, jobID string) (string, error) {
 }
 
 // GetVolumeFile inspects the output volume and return a path to the output file
-func GetVolumeFileName(accessToken string, volumeID string) (string, error) {
+func GetVolumeFileName(accessToken string, volumeID string, GEFAddress string) (string, error) {
 	log.Println("Reading the output volume " + volumeID)
-	resp, err := TLSHTTPRequest("GET", Config.GEFAddress+"/api/volumes/"+volumeID+"/?access_token="+accessToken, nil)
+	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/volumes/"+volumeID+"/?access_token="+accessToken, nil)
 	if err != nil {
 		return "", err
 	}
-	var jsonReply VolumeInspection
+	var jsonReply config.VolumeInspection
 
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
@@ -149,10 +151,10 @@ func GetVolumeFileName(accessToken string, volumeID string) (string, error) {
 }
 
 // GetOutputFile returns a link to the first file (Weblicht service will always produce only one file) from the output volume
-func GetOutputFileURL(accessToken string, jobID string) (string, error) {
+func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (string, error) {
 	log.Println("Retrieving a link to the output file from the job " + jobID)
 	for {
-		jobExitCode, err := GetJobStateCode(accessToken, jobID)
+		jobExitCode, err := GetJobStateCode(accessToken, jobID, GEFAddress)
 		if jobExitCode > -1 {
 			if err != nil {
 				return "", err
@@ -162,17 +164,17 @@ func GetOutputFileURL(accessToken string, jobID string) (string, error) {
 		time.Sleep(100 * time.Millisecond)
 	}
 
-	volumeID, err := GetOutputVolumeID(accessToken, jobID)
+	volumeID, err := GetOutputVolumeID(accessToken, jobID, GEFAddress)
 	if err != nil {
 		return "", err
 	}
 
-	fileName, err := GetVolumeFileName(accessToken, volumeID)
+	fileName, err := GetVolumeFileName(accessToken, volumeID, GEFAddress)
 	if err != nil {
 		return "", err
 	}
 
-	return Config.GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken, nil
+	return GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken, nil
 }
 
 // ReadOutputFile reads a file from a certain URL
