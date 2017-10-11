@@ -1,13 +1,13 @@
-package config
+package def
 
 import "time"
 
 // Configuration keeps all settings
 type Configuration struct {
-	PortNumber      string
-	GEFAddress             string
-	TimeOut                int64
-	Apps                   map[string]string
+	PortNumber string
+	GEFAddress string
+	TimeOut    int64
+	Apps       map[string]string
 }
 
 // SelectedJob is the format of JSON returned by GEF when inspecting a job

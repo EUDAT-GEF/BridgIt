@@ -3,31 +3,33 @@ package main
 import (
 	"testing"
 
-	"reflect"
 	"bytes"
-	"runtime"
-	"strings"
 	"fmt"
 	"log"
 	"os"
+	"reflect"
+	"runtime"
+	"strings"
+	"github.com/EUDAT-GEF/Bridgit/utils"
+	"github.com/EUDAT-GEF/Bridgit/api"
+
 )
 
 func TestClient(t *testing.T) {
-	config, err := ReadConfigFile(configFilePath)
+	config, err := utils.ReadConfigFile("./def/config.json")
 	CheckErr(t, err)
 
-	router := NewRouter()
-	srv := startHttpServer(config.PortNumber, router)
+	//router := utils.NewRouter()
+	//srv := startHttpServer(config.PortNumber, router)
 
-
-
-
+	app := api.NewApp(config)
+	go app.Start()
+	//CheckErr(t, err)
 
 	log.Println("Stopping HTTP server")
-	if err := srv.Shutdown(nil); err != nil {
-		panic(err)
-	}
-
+	err = app.Server.Shutdown(nil)
+	CheckErr(t, err)
+	
 	//
 	//// overwrite this because when testing we're in a different working directory
 	//config.Pier.InternalServicesFolder = internalServicesFolder
@@ -103,7 +105,6 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 	os.Exit(code)
 }
-
 
 func CheckErr(t *testing.T, err error) {
 	if err != nil {

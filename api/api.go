@@ -7,7 +7,8 @@ import (
 
 	"encoding/json"
 	"log"
-	"github.com/EUDAT-GEF/Bridgit/config"
+
+	"github.com/EUDAT-GEF/Bridgit/def"
 	"github.com/EUDAT-GEF/Bridgit/utils"
 
 	"github.com/gorilla/mux"
@@ -18,14 +19,21 @@ type Response struct {
 }
 
 type App struct {
-	Name string
-	Version string
+	Name        string
+	Version     string
 	Description string
-	Config config.Configuration
-	Server *http.Server
-
+	Config      def.Configuration
+	Server      *http.Server
 }
 
+type Route struct {
+	Name        string
+	Method      string
+	Pattern     string
+	HandlerFunc http.HandlerFunc
+}
+
+type Routes []Route
 
 // ClientError sets a 400 error
 func (w Response) ClientError(message string, err error) {
@@ -129,31 +137,17 @@ func jmap(kv ...interface{}) map[string]interface{} {
 	return m
 }
 
-type Route struct {
-	Name        string
-	Method      string
-	Pattern     string
-	HandlerFunc http.HandlerFunc
-}
+// NewApp creates a Bridgit application object (with config and server information) to initialize a service
+func NewApp(cfg def.Configuration) App {
+	log.Println("Preparing to start the service at port " + cfg.PortNumber)
+	srv := &http.Server{Addr: ":" + cfg.PortNumber}
 
-type Routes []Route
-
-func NewApp(cfg config.Configuration) App {
-	//router := NewRouter()
-
-
-
-
-	log.Println("Starting the service at port " + cfg.PortNumber)
-	srv := &http.Server{Addr: ":"+cfg.PortNumber}
-
-	application := App {
-		Name: "BridgIt",
-		Version: "0.1",
+	application := App{
+		Name:        "BridgIt",
+		Version:     "0.1",
 		Description: "This is Bridgit, a liaison between Weblicht and the GEF",
-		Config: cfg,
-		Server: srv,
-
+		Config:      cfg,
+		Server:      srv,
 	}
 
 	var routes = Routes{
@@ -171,7 +165,6 @@ func NewApp(cfg config.Configuration) App {
 		},
 	}
 
-
 	router := mux.NewRouter().StrictSlash(true)
 	for _, route := range routes {
 		var handler http.Handler
@@ -180,36 +173,33 @@ func NewApp(cfg config.Configuration) App {
 		handler = utils.Logger(handler, route.Name)
 
 		router.
-		Methods(route.Method).
+			Methods(route.Method).
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(handler)
-
 	}
 
-
 	application.Server.Handler = router
-
-
-
-
-
-
 	return application
 }
 
+// Start starts Bridgit service
 func (a *App) Start() error {
+	log.Println("Starting the service...")
 	return a.Server.ListenAndServe()
 }
 
+// Stop stops Bridgit service
 func (a *App) Stop() error {
 	return a.Server.ListenAndServe()
 }
 
+// Index shows information about the API
 func (a *App) Index(w http.ResponseWriter, r *http.Request) {
 	Response{w}.Ok(jmap("name", a.Name, "version", a.Version, "Description", a.Description))
 }
 
+// JobStart starts a job at the GEF instance
 func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	var serviceName []string
 	var accessToken []string

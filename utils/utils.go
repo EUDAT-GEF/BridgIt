@@ -9,15 +9,15 @@ import (
 	"time"
 
 	"crypto/tls"
+	"github.com/EUDAT-GEF/Bridgit/def"
 	"io/ioutil"
 	"log"
 	"path/filepath"
-	"github.com/EUDAT-GEF/Bridgit/config"
 )
 
 // ReadConfigFile reads a configuration file
-func ReadConfigFile(configFilepath string) (config.Configuration, error) {
-	var config config.Configuration
+func ReadConfigFile(configFilepath string) (def.Configuration, error) {
+	var config def.Configuration
 
 	file, err := os.Open(configFilepath)
 	if err != nil {
@@ -31,13 +31,8 @@ func ReadConfigFile(configFilepath string) (config.Configuration, error) {
 		return config, Err(err, "Cannot read config file %s", configFilepath)
 	}
 
-	//if config.StaticContentFolder == "" {
-	//	return config, Err(nil, "Empty static content folder name in file: %s", configFilepath)
-	//}
-
 	return config, nil
 }
-
 
 // TLSHTTPRequest allows to make requests ignoring the check of certificates
 func TLSHTTPRequest(method string, url string, form url.Values) (*http.Response, error) {
@@ -102,7 +97,7 @@ func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, 
 	}
 
 	// We need to read JSON that normally contains a volumeID
-	var jsonReply config.SelectedJob
+	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return 0, err
@@ -119,7 +114,7 @@ func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (str
 		return "", err
 	}
 
-	var jsonReply config.SelectedJob
+	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
 		return "", err
@@ -135,7 +130,7 @@ func GetVolumeFileName(accessToken string, volumeID string, GEFAddress string) (
 	if err != nil {
 		return "", err
 	}
-	var jsonReply config.VolumeInspection
+	var jsonReply def.VolumeInspection
 
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
@@ -187,4 +182,20 @@ func ReadOutputFile(fileURL string) ([]byte, error) {
 	outputBuf, err := ioutil.ReadAll(resp.Body)
 
 	return outputBuf, err
+}
+
+func Logger(inner http.Handler, name string) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		inner.ServeHTTP(w, r)
+
+		log.Printf(
+			"%s\t%s\t%s\t%s",
+			r.Method,
+			r.RequestURI,
+			name,
+			time.Since(start),
+		)
+	})
 }

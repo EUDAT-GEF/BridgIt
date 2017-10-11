@@ -3,25 +3,20 @@ package main
 import (
 	"log"
 
-
-	"github.com/EUDAT-GEF/Bridgit/utils"
 	"github.com/EUDAT-GEF/Bridgit/api"
+	"github.com/EUDAT-GEF/Bridgit/utils"
 )
 
 const configFilePath = "config.json"
 
-
 func main() {
-	config, err := utils.ReadConfigFile("./config/config.json")
+	config, err := utils.ReadConfigFile("./def/config.json")
 	if err != nil {
 		log.Fatal("FATAL: ", err)
 	}
 	app := api.NewApp(config)
-	app.Start()
-
-
-	//startHttpServer(Config.PortNumber, NewRouter())
-	//
-	//log.Fatal(http.ListenAndServe(":"+config.PortNumber, api.NewRouter()))
-
+	err = app.Start()
+	if err != nil {
+		log.Fatal("Failed to start the service")
+	}
 }
