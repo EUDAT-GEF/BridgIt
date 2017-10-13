@@ -60,3 +60,9 @@ type VolumeItem struct {
 	Path       string       `json:"path"`
 	FolderTree []VolumeItem `json:"folderTree"`
 }
+
+type Info struct {
+	Name        string `json:"name"`
+	Version     string `json:"version"`
+	Description string `json:"description"`
+}

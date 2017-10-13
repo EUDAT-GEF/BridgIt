@@ -19,11 +19,9 @@ type Response struct {
 }
 
 type App struct {
-	Name        string
-	Version     string
-	Description string
-	Config      def.Configuration
-	Server      *http.Server
+	Info   def.Info
+	Config def.Configuration
+	Server *http.Server
 }
 
 type Route struct {
@@ -143,11 +141,13 @@ func NewApp(cfg def.Configuration) App {
 	srv := &http.Server{Addr: ":" + cfg.PortNumber}
 
 	application := App{
-		Name:        "BridgIt",
-		Version:     "0.1",
-		Description: "This is Bridgit, a liaison between Weblicht and the GEF",
-		Config:      cfg,
-		Server:      srv,
+		Info: def.Info{
+			Name:        "BridgIt",
+			Version:     "0.1",
+			Description: "This is Bridgit, a liaison between Weblicht and the GEF",
+		},
+		Config: cfg,
+		Server: srv,
 	}
 
 	var routes = Routes{
@@ -196,7 +196,7 @@ func (a *App) Stop() error {
 
 // Index shows information about the API
 func (a *App) Index(w http.ResponseWriter, r *http.Request) {
-	Response{w}.Ok(jmap("name", a.Name, "version", a.Version, "Description", a.Description))
+	Response{w}.Ok(jmap("name", a.Info.Name, "version", a.Info.Version, "Description", a.Info.Description))
 }
 
 // JobStart starts a job at the GEF instance
@@ -207,31 +207,25 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	var ok bool
 
 	if serviceName, ok = r.URL.Query()["service"]; !ok {
-		Response{w}.ServerError("Could not extract a service ID from the request URL", nil)
+		errMsg := "Could not extract a service name from the request URL"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 		return
 	}
 
 	if accessToken, ok = r.URL.Query()["token"]; !ok {
-		Response{w}.ServerError("Could not extract an access token from the request URL", nil)
+		errMsg := "Could not extract an access token from the request URL"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 		return
 	}
 
 	if inputFile, ok = r.URL.Query()["input"]; !ok {
-		Response{w}.ServerError("Could not extract an input file name from the request URL", nil)
+		errMsg := "Could not extract an input file name from the request URL"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 		return
 	}
-
-	//content, err := ioutil.ReadFile(inputFile[0])
-	//uniqueName := uuid.New()
-
-	// Saving the file to serve it to the next Weblicht service
-	//savedFileName := filepath.Join(Config.StaticContentFolder, uniqueName)
-	//f, err := os.Create(savedFileName)
-	//defer f.Close()
-	//_, err = f.Write(content)
-	//if err != nil {
-	//	Response{w}.ServerError("Error while writing in a file", err)
-	//}
 
 	var serviceID string
 	for k := range a.Config.Apps {
@@ -240,24 +234,32 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if len(serviceID) == 0 {
-		Response{w}.ServerError("Service ID was not found", nil)
+		errMsg := "Service ID was not found"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 	}
 
 	// Making a request to the GEF instance specified in the config file
 	jobID, err := utils.StartGEFJob(serviceID, accessToken[0], inputFile[0], a.Config.GEFAddress)
 
 	if err != nil {
-		Response{w}.ServerError("Error while starting a new job", err)
+		errMsg := "Error while starting a new job"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 	}
 
 	outputFileLink, err := utils.GetOutputFileURL(accessToken[0], jobID, a.Config.GEFAddress)
 	if err != nil {
-		Response{w}.ServerError("Error while getting a link to the output file", err)
+		errMsg := "Error while getting a link to the output file"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 	}
 
 	outputBuf, err := utils.ReadOutputFile(outputFileLink)
 	if err != nil {
-		Response{w}.ServerError("Error while reading the output file", err)
+		errMsg := "Error while reading the output file"
+		log.Println(errMsg)
+		http.Error(w, errMsg, 500)
 	}
 	outputType := http.DetectContentType(outputBuf)
 

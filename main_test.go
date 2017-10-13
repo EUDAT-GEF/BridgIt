@@ -13,23 +13,110 @@ import (
 	"github.com/EUDAT-GEF/Bridgit/utils"
 	"github.com/EUDAT-GEF/Bridgit/api"
 
+	"net/http"
+	"net/http/httptest"
+	"encoding/json"
+	"github.com/EUDAT-GEF/Bridgit/def"
 )
 
 func TestClient(t *testing.T) {
 	config, err := utils.ReadConfigFile("./def/config.json")
 	CheckErr(t, err)
 
-	//router := utils.NewRouter()
-	//srv := startHttpServer(config.PortNumber, router)
+
 
 	app := api.NewApp(config)
 	go app.Start()
-	//CheckErr(t, err)
+
+
+
+
+
+
+
+
+
+	req, err := http.NewRequest("GET", "/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(app.Index)
+
+	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
+	// directly and pass in our Request and ResponseRecorder.
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expected := app.Info
+	var infoReply def.Info
+	err = json.NewDecoder(rr.Body).Decode(&infoReply)
+
+
+	CheckErr(t, err)
+	ExpectEquals(t, infoReply, expected)
+
+
+
+
+
+
+
+
+
+
+	req, err = http.NewRequest("POST", "/jobs", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// We create a ResponseRecorder (which satisfies http.ResponseWriter) to record the response.
+	rr = httptest.NewRecorder()
+	handler = http.HandlerFunc(app.JobStart)
+
+	// Our handlers satisfy http.Handler, so we can call their ServeHTTP method
+	// directly and pass in our Request and ResponseRecorder.
+	handler.ServeHTTP(rr, req)
+
+	// Check the status code is what we expect.
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body is what we expect.
+	expected := app.Info
+	var infoReply def.Info
+	err = json.NewDecoder(rr.Body).Decode(&infoReply)
+
+
+	CheckErr(t, err)
+	ExpectEquals(t, infoReply, expected)
+
+
+
+
+
+
+
+
+
+
+
 
 	log.Println("Stopping HTTP server")
 	err = app.Server.Shutdown(nil)
 	CheckErr(t, err)
-	
+
+
 	//
 	//// overwrite this because when testing we're in a different working directory
 	//config.Pier.InternalServicesFolder = internalServicesFolder
