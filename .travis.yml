@@ -13,4 +13,4 @@ install:
   - make webui
 
 script:
-  - make dependencies
+  - go test -cover --coverpkg ./...

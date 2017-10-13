@@ -200,7 +200,7 @@ func (a *App) Stop() error {
 }
 
 func (a *App) TestJobStart(w http.ResponseWriter, r *http.Request) {
-	Response{w}.Ok(jmap("jobID", "sdsd"))
+	Response{w}.Ok(jmap("jobID", "testJobID"))
 }
 
 func (a *App) TestJobInspect(w http.ResponseWriter, r *http.Request) {
