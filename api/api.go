@@ -33,30 +33,16 @@ type Route struct {
 
 type Routes []Route
 
-// ClientError sets a 400 error
-func (w Response) ClientError(message string, err error) {
-	str := fmt.Sprintf("    API Client ERROR: %s\n\t%s", message, err.Error())
-	log.Println(str)
-	http.Error(w, str, 400)
-}
-
-// DirectiveError sets a 403 error
-func (w Response) DirectiveError() {
-	str := fmt.Sprintf("    API denied by directive ERROR\n")
-	log.Println(str)
-	http.Error(w, str, 403)
-}
-
 // ServerError sets a 500/server error
 func (w Response) ServerError(message string, err error) {
-	str := fmt.Sprintf("    API Server ERROR: %s\n\t%s", message, err.Error())
+	str := fmt.Sprintf("API Server error: %s\n\t%s", message, err.Error())
 	log.Println(str)
 	http.Error(w, str, 500)
 }
 
 // ServerNewError sets a 500/server error
 func (w Response) ServerNewError(message string) {
-	str := fmt.Sprintf("    API Server ERROR: %s", message)
+	str := fmt.Sprintf("API Server error: %s", message)
 	log.Println(str)
 	http.Error(w, str, 500)
 }
@@ -207,59 +193,52 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	var ok bool
 
 	if serviceName, ok = r.URL.Query()["service"]; !ok {
-		errMsg := "Could not extract a service name from the request URL"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+		Response{w}.ServerNewError("Could not extract a service name from the request URL")
 		return
 	}
 
 	if accessToken, ok = r.URL.Query()["token"]; !ok {
-		errMsg := "Could not extract an access token from the request URL"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+		Response{w}.ServerNewError("Could not extract an access token from the request URL")
 		return
 	}
 
 	if inputFile, ok = r.URL.Query()["input"]; !ok {
-		errMsg := "Could not extract an input file name from the request URL"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+		Response{w}.ServerNewError("Could not extract an input file name from the request URL")
 		return
 	}
 
 	var serviceID string
+	serviceFound := false
 	for k := range a.Config.Apps {
 		if k == serviceName[0] {
+			serviceFound = true
 			serviceID = a.Config.Apps[k]
+			break
 		}
 	}
-	if len(serviceID) == 0 {
-		errMsg := "Service ID was not found"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+
+	if !serviceFound {
+		Response{w}.ServerNewError("Could not locate any services corresponding to the service name specified in the request URL")
+		return
 	}
 
 	// Making a request to the GEF instance specified in the config file
 	jobID, err := utils.StartGEFJob(serviceID, accessToken[0], inputFile[0], a.Config.GEFAddress)
-
 	if err != nil {
-		errMsg := "Error while starting a new job"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+		Response{w}.ServerError("Error while starting a new job on the GEF instance", err)
+		return
 	}
 
 	outputFileLink, err := utils.GetOutputFileURL(accessToken[0], jobID, a.Config.GEFAddress)
 	if err != nil {
-		errMsg := "Error while getting a link to the output file"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+		Response{w}.ServerError("Error while getting a link to the output file", err)
+		return
 	}
 
 	outputBuf, err := utils.ReadOutputFile(outputFileLink)
 	if err != nil {
-		errMsg := "Error while reading the output file"
-		log.Println(errMsg)
-		http.Error(w, errMsg, 500)
+		Response{w}.ServerError("Error while reading the output file", err)
+		return
 	}
 	outputType := http.DetectContentType(outputBuf)
 

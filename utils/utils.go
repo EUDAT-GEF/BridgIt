@@ -9,10 +9,11 @@ import (
 	"time"
 
 	"crypto/tls"
-	"github.com/EUDAT-GEF/Bridgit/def"
 	"io/ioutil"
 	"log"
 	"path/filepath"
+
+	"github.com/EUDAT-GEF/Bridgit/def"
 )
 
 // ReadConfigFile reads a configuration file
@@ -70,37 +71,38 @@ func StartGEFJob(serviceID string, accessToken string, pid string, GEFAddress st
 
 	resp, err := TLSHTTPRequest("POST", GEFAddress+"/api/jobs?access_token="+accessToken, form)
 	if err != nil {
-		return "", err
+		return "", Err(err, "Failed to send a POST request that starts a job")
 	}
 
 	// We need to read JSON that normally contains a jobID
 	var jsonReply map[string]interface{}
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
-		return "", err
+		return "", Err(err, "Failed to parse the GEF server reply")
 	}
 
 	if val, ok := jsonReply["jobID"]; ok {
 		if jobID, ok := val.(string); ok {
 			return jobID, nil
+		} else {
+			return "", Err(nil, "Failed to convert the output to string")
 		}
+	} else {
+		return "", Err(nil, "JobID was not found in the GEF server reply")
 	}
-
-	return "", Err(err, "Failed to convert the output to string")
 }
 
 // GetJobStateCode returns the job exit code (-1 running, 0 ended successfully, 1 failed)
 func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, error) {
 	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
 	if err != nil {
-		return 0, err
+		return 1, Err(err, "Failed to send a GET request that returns a job status")
 	}
 
-	// We need to read JSON that normally contains a volumeID
 	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
-		return 0, err
+		return 1, Err(err, "Failed to parse the GEF server reply")
 	}
 
 	return jsonReply.Job.State.Code, nil
@@ -111,13 +113,13 @@ func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (str
 	log.Println("Retrieving the output volume ID for the job " + jobID)
 	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
 	if err != nil {
-		return "", err
+		return "", Err(err, "Failed to get an output volume id for the job %s", jobID)
 	}
 
 	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
-		return "", err
+		return "", Err(err, "Failed to parse the GEF server reply")
 	}
 
 	return jsonReply.Job.OutputVolume, nil
@@ -128,13 +130,13 @@ func GetVolumeFileName(accessToken string, volumeID string, GEFAddress string) (
 	log.Println("Reading the output volume " + volumeID)
 	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/volumes/"+volumeID+"/?access_token="+accessToken, nil)
 	if err != nil {
-		return "", err
+		return "", Err(err, "Failed to get a path to the output file in the volume %s", volumeID)
 	}
 	var jsonReply def.VolumeInspection
 
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
 	if err != nil {
-		return "", err
+		return "", Err(err, "Failed to parse the GEF server reply")
 	}
 
 	if len(jsonReply.VolumeContent) > 0 {
@@ -142,7 +144,6 @@ func GetVolumeFileName(accessToken string, volumeID string, GEFAddress string) (
 	} else {
 		return "", nil
 	}
-
 }
 
 // GetOutputFile returns a link to the first file (Weblicht service will always produce only one file) from the output volume
@@ -152,7 +153,7 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 		jobExitCode, err := GetJobStateCode(accessToken, jobID, GEFAddress)
 		if jobExitCode > -1 {
 			if err != nil {
-				return "", err
+				return "", Err(err, "The job failed")
 			}
 			break
 		}
@@ -174,10 +175,10 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 
 // ReadOutputFile reads a file from a certain URL
 func ReadOutputFile(fileURL string) ([]byte, error) {
-	log.Println("Reading the output file")
+	log.Println("Reading the output file: " + fileURL)
 	resp, err := TLSHTTPRequest("GET", fileURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, Err(err, "Could not access the output file %s", fileURL)
 	}
 	outputBuf, err := ioutil.ReadAll(resp.Body)
 

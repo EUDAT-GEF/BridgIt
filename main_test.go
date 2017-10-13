@@ -10,12 +10,14 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
-	"github.com/EUDAT-GEF/Bridgit/utils"
-	"github.com/EUDAT-GEF/Bridgit/api"
 
+	"github.com/EUDAT-GEF/Bridgit/api"
+	"github.com/EUDAT-GEF/Bridgit/utils"
+
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"encoding/json"
+
 	"github.com/EUDAT-GEF/Bridgit/def"
 )
 
@@ -23,18 +25,8 @@ func TestClient(t *testing.T) {
 	config, err := utils.ReadConfigFile("./def/config.json")
 	CheckErr(t, err)
 
-
-
 	app := api.NewApp(config)
 	go app.Start()
-
-
-
-
-
-
-
-
 
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
@@ -60,18 +52,8 @@ func TestClient(t *testing.T) {
 	var infoReply def.Info
 	err = json.NewDecoder(rr.Body).Decode(&infoReply)
 
-
 	CheckErr(t, err)
 	ExpectEquals(t, infoReply, expected)
-
-
-
-
-
-
-
-
-
 
 	req, err = http.NewRequest("POST", "/jobs", nil)
 	if err != nil {
@@ -97,25 +79,12 @@ func TestClient(t *testing.T) {
 	var infoReply def.Info
 	err = json.NewDecoder(rr.Body).Decode(&infoReply)
 
-
 	CheckErr(t, err)
 	ExpectEquals(t, infoReply, expected)
-
-
-
-
-
-
-
-
-
-
-
 
 	log.Println("Stopping HTTP server")
 	err = app.Server.Shutdown(nil)
 	CheckErr(t, err)
-
 
 	//
 	//// overwrite this because when testing we're in a different working directory

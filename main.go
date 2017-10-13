@@ -7,8 +7,6 @@ import (
 	"github.com/EUDAT-GEF/Bridgit/utils"
 )
 
-const configFilePath = "config.json"
-
 func main() {
 	config, err := utils.ReadConfigFile("./def/config.json")
 	if err != nil {
