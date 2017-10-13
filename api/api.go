@@ -12,6 +12,7 @@ import (
 	"github.com/EUDAT-GEF/Bridgit/utils"
 
 	"github.com/gorilla/mux"
+	"time"
 )
 
 type Response struct {
@@ -149,6 +150,24 @@ func NewApp(cfg def.Configuration) App {
 			"/jobs",
 			application.JobStart,
 		},
+		Route{
+			"TestJobStart",
+			"POST",
+			"/api/jobs",
+			application.TestJobStart,
+		},
+		Route{
+			"TestJobInspect",
+			"GET",
+			"/api/jobs/{jobID}",
+			application.TestJobInspect,
+		},
+		Route{
+			"TestVolumeInspect",
+			"GET",
+			"/api/volumes/{volumeID}",
+			application.TestVolumeInspect,
+		},
 	}
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -178,6 +197,39 @@ func (a *App) Start() error {
 // Stop stops Bridgit service
 func (a *App) Stop() error {
 	return a.Server.ListenAndServe()
+}
+
+func (a *App) TestJobStart(w http.ResponseWriter, r *http.Request) {
+	Response{w}.Ok(jmap("jobID", "sdsd"))
+}
+
+func (a *App) TestJobInspect(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	jobID := vars["jobID"]
+
+	fakeJob := def.SingleJob{
+		ID:           jobID,
+		ConnectionID: 1,
+		ServiceID:    "serviceID string",
+		Input:        "input URL",
+		Created:      time.Now(),
+		Duration:     10,
+		State:        &def.JobState{Code: 0, Status: "Done", Error: ""},
+		InputVolume:  "InputVolume",
+		OutputVolume: "OutputVolume",
+		Tasks:        []def.Task{},
+	}
+
+	Response{w}.Ok(jmap("job", fakeJob))
+}
+
+func (a *App) TestVolumeInspect(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	var volumeFiles []def.VolumeItem
+	outputFile := def.VolumeItem{Name: "results.txt", Size: 50, Modified: time.Now(), IsFolder: false, Path: "", FolderTree: []def.VolumeItem{}}
+
+	volumeFiles = append(volumeFiles, outputFile)
+	Response{w}.Ok(jmap("volumeID", vars["volumeID"], "volumeContent", volumeFiles))
 }
 
 // Index shows information about the API

@@ -64,6 +64,7 @@ func TLSHTTPRequest(method string, url string, form url.Values) (*http.Response,
 // StartGEFJob starts a new job in the GEF
 func StartGEFJob(serviceID string, accessToken string, pid string, GEFAddress string) (string, error) {
 	log.Println("Starting a new job for the service " + serviceID + " with the PID " + pid)
+
 	// Creating a form
 	form := url.Values{}
 	form.Add("serviceID", serviceID)
@@ -95,6 +96,7 @@ func StartGEFJob(serviceID string, accessToken string, pid string, GEFAddress st
 // GetJobStateCode returns the job exit code (-1 running, 0 ended successfully, 1 failed)
 func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, error) {
 	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
+
 	if err != nil {
 		return 1, Err(err, "Failed to send a GET request that returns a job status")
 	}
@@ -112,6 +114,7 @@ func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, 
 func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (string, error) {
 	log.Println("Retrieving the output volume ID for the job " + jobID)
 	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/jobs/"+jobID+"?access_token="+accessToken, nil)
+
 	if err != nil {
 		return "", Err(err, "Failed to get an output volume id for the job %s", jobID)
 	}
