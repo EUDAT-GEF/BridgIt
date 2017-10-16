@@ -2,9 +2,9 @@ dist: trusty
 sudo: required
 language: go
 
-install:
+before_install:
   - echo ${TRAVIS_BUILD_DIR}
   - echo ${GOPATH}
 
 script:
-  - go test
+  - go test github.com/EUDAT-GEF/Bridgit/api, github.com/EUDAT-GEF/Bridgit/utils
