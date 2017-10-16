@@ -10,15 +10,14 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/EUDAT-GEF/Bridgit/api"
-	"github.com/EUDAT-GEF/Bridgit/utils"
+	"github.com/EUDAT-GEF/BridgIt/api"
+	"github.com/EUDAT-GEF/BridgIt/utils"
 
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/EUDAT-GEF/Bridgit/def"
-
+	"github.com/EUDAT-GEF/BridgIt/def"
 )
 
 var accessToken = "yJYcu3KjXqawyaeMIKPBuJc1ArCkAGFJIDQwgf89wP5JBOEl"
@@ -75,7 +74,7 @@ func TestClient(t *testing.T) {
 			status, http.StatusOK)
 	}
 
-	expectedLink := app.Config.GEFAddress + "/api/volumes/OutputVolume/results.txt?content&access_token="+accessToken
+	expectedLink := app.Config.GEFAddress + "/api/volumes/OutputVolume/results.txt?content&access_token=" + accessToken
 
 	CheckErr(t, err)
 	ExpectEquals(t, rr.Body.String(), expectedLink)

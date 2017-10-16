@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/EUDAT-GEF/Bridgit/api"
-	"github.com/EUDAT-GEF/Bridgit/utils"
+	"github.com/EUDAT-GEF/BridgIt/api"
+	"github.com/EUDAT-GEF/BridgIt/utils"
 )
 
 func main() {

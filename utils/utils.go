@@ -13,7 +13,7 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/EUDAT-GEF/Bridgit/def"
+	"github.com/EUDAT-GEF/BridgIt/def"
 )
 
 // ReadConfigFile reads a configuration file

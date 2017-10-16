@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/EUDAT-GEF/Bridgit/def"
-	"github.com/EUDAT-GEF/Bridgit/utils"
+	"github.com/EUDAT-GEF/BridgIt/def"
+	"github.com/EUDAT-GEF/BridgIt/utils"
 
 	"github.com/gorilla/mux"
 	"time"
