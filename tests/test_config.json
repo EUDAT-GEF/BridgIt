@@ -1,6 +1,6 @@
 {
-  "PortNumber": "8080",
-  "GEFAddress": "http://localhost:8080",
+  "PortNumber": "8181",
+  "GEFAddress": "http://localhost:8181",
   "TimeOut": 1000,
   "Apps": {
     "fake": "serviceID string"
