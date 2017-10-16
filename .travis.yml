@@ -7,4 +7,4 @@ before_install:
   - echo ${GOPATH}
 
 script:
-  - go test github.com/EUDAT-GEF/BridgIt/api, github.com/EUDAT-GEF/BridgIt/utils, github.com/EUDAT-GEF/BridgIt/def
+  - go test ./...
