@@ -243,7 +243,7 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	var accessToken []string
 	var inputFile []string
 	var ok bool
-
+	fmt.Println(r.URL.Query())
 	if serviceName, ok = r.URL.Query()["service"]; !ok {
 		Response{w}.ServerNewError("Could not extract a service name from the request URL")
 		return
@@ -278,18 +278,41 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	jobID, err := utils.StartGEFJob(serviceID, accessToken[0], inputFile[0], a.Config.GEFAddress)
 	if err != nil {
 		Response{w}.ServerError("Error while starting a new job on the GEF instance", err)
+		errMsg := "Error while starting a new job"
+		log.Println(errMsg)
+		errMsg 	= fmt.Sprintf("    details: %s\n\t%s\t%s\t%s",
+			serviceID,
+			accessToken[0],
+			inputFile[0],
+			a.Config.GEFAddress);
+		log.Println(errMsg)
+		
+		http.Error(w, errMsg, 500)
 		return
 	}
 
 	outputFileLink, err := utils.GetOutputFileURL(accessToken[0], jobID, a.Config.GEFAddress)
 	if err != nil {
 		Response{w}.ServerError("Error while getting a link to the output file", err)
-		return
+		errMsg := "Error while getting a link to the output file"
+		log.Println(errMsg)
+		errMsg 	= fmt.Sprintf("    details: %s\n\t%s\t%s",
+			accessToken[0],
+			jobID, 
+			a.Config.GEFAddress);
+		log.Println(errMsg)		
+		http.Error(w, errMsg, 500)
+		return		
 	}
 
 	outputBuf, err := utils.ReadOutputFile(outputFileLink)
 	if err != nil {
 		Response{w}.ServerError("Error while reading the output file", err)
+		errMsg := "Error while reading the output file"
+		log.Println(errMsg)
+		errMsg 	= fmt.Sprintf("    details: %s\n", outputFileLink);
+		log.Println(errMsg)				
+		http.Error(w, errMsg, 500)
 		return
 	}
 	outputType := http.DetectContentType(outputBuf)

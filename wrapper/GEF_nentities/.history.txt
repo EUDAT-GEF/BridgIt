@@ -1,0 +1,7 @@
+docker build -t weblicht/service-nentities .
+docker run -v $(pwd)/data:/wrapper/data weblicht/service-nentities  http://weblicht.sfs.uni-tuebingen.de/clrs/storage/1507719765366.out
+
+
+
+
+
