@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<D-Spin xmlns="http://www.dspin.de/data" version="0.4">
+  <MetaData xmlns="http://www.dspin.de/data/metadata">
+    <source></source>
+  </MetaData>
+  <TextCorpus xmlns="http://www.dspin.de/data/textcorpus" lang="de">
+    <text>EU authorities in Brussels have called for a reform of European asylum rules to ease the strain on countries such as Greece and Italy that are struggling to cope with a large influx of people.
+
+About 1.1 million migrants and refugees arrived in the EU last year, bringing the blocâs common asylum system to the brink of collapse. Amid the biggest movement of refugees since the end of the second world war, several countries have abandoned common EU rules or announced the unilateral closure of their borders.
+</text>
+  </TextCorpus>
+</D-Spin>

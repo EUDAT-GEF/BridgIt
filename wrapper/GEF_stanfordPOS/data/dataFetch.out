@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<D-Spin xmlns="http://www.dspin.de/data" version="0.4">
+  <MetaData xmlns="http://www.dspin.de/data/metadata">
+    <source></source>
+  </MetaData>
+  <TextCorpus xmlns="http://www.dspin.de/data/textcorpus" lang="de">
+    <tc:text xmlns:tc="http://www.dspin.de/data/textcorpus">EU authorities in Brussels have called for a reform of European asylum rules to ease the strain on countries such as Greece and Italy that are struggling to cope with a large influx of people.
+
+About 1.1 million migrants and refugees arrived in the EU last year, bringing the blocÃ¢ÂÂs common asylum system to the brink of collapse. Amid the biggest movement of refugees since the end of the second world war, several countries have abandoned common EU rules or announced the unilateral closure of their borders.
+</tc:text>
+    <tc:tokens xmlns:tc="http://www.dspin.de/data/textcorpus">
+      <tc:token ID="t_0">EU</tc:token>
+      <tc:token ID="t_1">authorities</tc:token>
+      <tc:token ID="t_2">in</tc:token>
+      <tc:token ID="t_3">Brussels</tc:token>
+      <tc:token ID="t_4">have</tc:token>
+      <tc:token ID="t_5">called</tc:token>
+      <tc:token ID="t_6">for</tc:token>
+      <tc:token ID="t_7">a</tc:token>
+      <tc:token ID="t_8">reform</tc:token>
+      <tc:token ID="t_9">of</tc:token>
+      <tc:token ID="t_10">European</tc:token>
+      <tc:token ID="t_11">asylum</tc:token>
+      <tc:token ID="t_12">rules</tc:token>
+      <tc:token ID="t_13">to</tc:token>
+      <tc:token ID="t_14">ease</tc:token>
+      <tc:token ID="t_15">the</tc:token>
+      <tc:token ID="t_16">strain</tc:token>
+      <tc:token ID="t_17">on</tc:token>
+      <tc:token ID="t_18">countries</tc:token>
+      <tc:token ID="t_19">such</tc:token>
+      <tc:token ID="t_20">as</tc:token>
+      <tc:token ID="t_21">Greece</tc:token>
+      <tc:token ID="t_22">and</tc:token>
+      <tc:token ID="t_23">Italy</tc:token>
+      <tc:token ID="t_24">that</tc:token>
+      <tc:token ID="t_25">are</tc:token>
+      <tc:token ID="t_26">struggling</tc:token>
+      <tc:token ID="t_27">to</tc:token>
+      <tc:token ID="t_28">cope</tc:token>
+      <tc:token ID="t_29">with</tc:token>
+      <tc:token ID="t_30">a</tc:token>
+      <tc:token ID="t_31">large</tc:token>
+      <tc:token ID="t_32">influx</tc:token>
+      <tc:token ID="t_33">of</tc:token>
+      <tc:token ID="t_34">people</tc:token>
+      <tc:token ID="t_35">.</tc:token>
+      <tc:token ID="t_36">About</tc:token>
+      <tc:token ID="t_37">1.1</tc:token>
+      <tc:token ID="t_38">million</tc:token>
+      <tc:token ID="t_39">migrants</tc:token>
+      <tc:token ID="t_40">and</tc:token>
+      <tc:token ID="t_41">refugees</tc:token>
+      <tc:token ID="t_42">arrived</tc:token>
+      <tc:token ID="t_43">in</tc:token>
+      <tc:token ID="t_44">the</tc:token>
+      <tc:token ID="t_45">EU</tc:token>
+      <tc:token ID="t_46">last</tc:token>
+      <tc:token ID="t_47">year</tc:token>
+      <tc:token ID="t_48">,</tc:token>
+      <tc:token ID="t_49">bringing</tc:token>
+      <tc:token ID="t_50">the</tc:token>
+      <tc:token ID="t_51">blocÃ¢</tc:token>
+      <tc:token ID="t_52">$</tc:token>
+      <tc:token ID="t_53">s</tc:token>
+      <tc:token ID="t_54">common</tc:token>
+      <tc:token ID="t_55">asylum</tc:token>
+      <tc:token ID="t_56">system</tc:token>
+      <tc:token ID="t_57">to</tc:token>
+      <tc:token ID="t_58">the</tc:token>
+      <tc:token ID="t_59">brink</tc:token>
+      <tc:token ID="t_60">of</tc:token>
+      <tc:token ID="t_61">collapse</tc:token>
+      <tc:token ID="t_62">.</tc:token>
+      <tc:token ID="t_63">Amid</tc:token>
+      <tc:token ID="t_64">the</tc:token>
+      <tc:token ID="t_65">biggest</tc:token>
+      <tc:token ID="t_66">movement</tc:token>
+      <tc:token ID="t_67">of</tc:token>
+      <tc:token ID="t_68">refugees</tc:token>
+      <tc:token ID="t_69">since</tc:token>
+      <tc:token ID="t_70">the</tc:token>
+      <tc:token ID="t_71">end</tc:token>
+      <tc:token ID="t_72">of</tc:token>
+      <tc:token ID="t_73">the</tc:token>
+      <tc:token ID="t_74">second</tc:token>
+      <tc:token ID="t_75">world</tc:token>
+      <tc:token ID="t_76">war</tc:token>
+      <tc:token ID="t_77">,</tc:token>
+      <tc:token ID="t_78">several</tc:token>
+      <tc:token ID="t_79">countries</tc:token>
+      <tc:token ID="t_80">have</tc:token>
+      <tc:token ID="t_81">abandoned</tc:token>
+      <tc:token ID="t_82">common</tc:token>
+      <tc:token ID="t_83">EU</tc:token>
+      <tc:token ID="t_84">rules</tc:token>
+      <tc:token ID="t_85">or</tc:token>
+      <tc:token ID="t_86">announced</tc:token>
+      <tc:token ID="t_87">the</tc:token>
+      <tc:token ID="t_88">unilateral</tc:token>
+      <tc:token ID="t_89">closure</tc:token>
+      <tc:token ID="t_90">of</tc:token>
+      <tc:token ID="t_91">their</tc:token>
+      <tc:token ID="t_92">borders</tc:token>
+      <tc:token ID="t_93">.</tc:token>
+    </tc:tokens>
+    <tc:sentences xmlns:tc="http://www.dspin.de/data/textcorpus">
+      <tc:sentence tokenIDs="t_0 t_1 t_2 t_3 t_4 t_5 t_6 t_7 t_8 t_9 t_10 t_11 t_12 t_13 t_14 t_15 t_16 t_17 t_18 t_19 t_20 t_21 t_22 t_23 t_24 t_25 t_26 t_27 t_28 t_29 t_30 t_31 t_32 t_33 t_34 t_35"></tc:sentence>
+      <tc:sentence tokenIDs="t_36 t_37 t_38 t_39 t_40 t_41 t_42 t_43 t_44 t_45 t_46 t_47 t_48 t_49 t_50 t_51 t_52 t_53 t_54 t_55 t_56 t_57 t_58 t_59 t_60 t_61 t_62"></tc:sentence>
+      <tc:sentence tokenIDs="t_63 t_64 t_65 t_66 t_67 t_68 t_69 t_70 t_71 t_72 t_73 t_74 t_75 t_76 t_77 t_78 t_79 t_80 t_81 t_82 t_83 t_84 t_85 t_86 t_87 t_88 t_89 t_90 t_91 t_92 t_93"></tc:sentence>
+    </tc:sentences>
+  </TextCorpus>
+</D-Spin>

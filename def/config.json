@@ -3,7 +3,14 @@
   "GEFAddress": "https://localhost:8443",
   "TimeOut": 1000,
   "Apps": {
-    "nltk": "91207aa2-5fb4-440d-bce0-79fb6027d928",
-    "stanford": "ce5203bb-f161-49af-83e5-4486e408fce5"
+    "To TCF Converter (GEF@sfs_tuebingen)"                 : "fc404428-e791-4686-b864-52ea955d3059",
+    "ToTCFConverter_GEF"                                   : "fc404428-e791-4686-b864-52ea955d3059",
+    "Stanford Tokenizer (GEF@sfs_tuebingen)"               : "6f53b81c-65cf-4ad7-99c5-497b77c5edec",
+    "StanfordTokenizer_GEF"                                : "6f53b81c-65cf-4ad7-99c5-497b77c5edec",
+    "Illinois Named Entity Recognizer (GEF@sfs_tuebingen)" : "7edea4bc-4933-4d08-b1db-569817f6fe2e",
+    "Illinois_NER_GEF"                                     : "7edea4bc-4933-4d08-b1db-569817f6fe2e",
+    "Stanford NER (GEF@sfs_tuebingen)"                     : "04f606a6-3b78-42fa-8f62-f411d6bda17e",
+    "Stanford_NER_GEF"                                     : "04f606a6-3b78-42fa-8f62-f411d6bda17e",
+    "StanfordPOSTagger_GEF"                                : "d37a1ad5-4011-44e2-ae3b-6e0f5958aec4"
   }
 }
