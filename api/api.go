@@ -11,20 +11,24 @@ import (
 	"github.com/EUDAT-GEF/BridgIt/def"
 	"github.com/EUDAT-GEF/BridgIt/utils"
 
-	"github.com/gorilla/mux"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
+// Response we return
 type Response struct {
 	http.ResponseWriter
 }
 
+// App info and config
 type App struct {
 	Info   def.Info
 	Config def.Configuration
 	Server *http.Server
 }
 
+// Route defines routes
 type Route struct {
 	Name        string
 	Method      string
@@ -32,6 +36,7 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
+// Routes includes all routes
 type Routes []Route
 
 // ServerError sets a 500/server error
@@ -199,10 +204,12 @@ func (a *App) Stop() error {
 	return a.Server.ListenAndServe()
 }
 
+// TestJobStart used to test JobStart
 func (a *App) TestJobStart(w http.ResponseWriter, r *http.Request) {
 	Response{w}.Ok(jmap("jobID", "testJobID"))
 }
 
+// TestJobInspect used test JobInspect
 func (a *App) TestJobInspect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
@@ -223,6 +230,7 @@ func (a *App) TestJobInspect(w http.ResponseWriter, r *http.Request) {
 	Response{w}.Ok(jmap("job", fakeJob))
 }
 
+// TestVolumeInspect used to test VolumeInspect
 func (a *App) TestVolumeInspect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var volumeFiles []def.VolumeItem
@@ -243,7 +251,7 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 	var accessToken []string
 	var inputFile []string
 	var ok bool
-	fmt.Println(r.URL.Query())
+	log.Println(r.URL.Query())
 	if serviceName, ok = r.URL.Query()["service"]; !ok {
 		Response{w}.ServerNewError("Could not extract a service name from the request URL")
 		return
@@ -280,13 +288,13 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 		Response{w}.ServerError("Error while starting a new job on the GEF instance", err)
 		errMsg := "Error while starting a new job"
 		log.Println(errMsg)
-		errMsg 	= fmt.Sprintf("    details: %s\n\t%s\t%s\t%s",
+		errMsg = fmt.Sprintf("    details: %s\n\t%s\t%s\t%s",
 			serviceID,
 			accessToken[0],
 			inputFile[0],
-			a.Config.GEFAddress);
+			a.Config.GEFAddress)
 		log.Println(errMsg)
-		
+
 		http.Error(w, errMsg, 500)
 		return
 	}
@@ -296,13 +304,13 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 		Response{w}.ServerError("Error while getting a link to the output file", err)
 		errMsg := "Error while getting a link to the output file"
 		log.Println(errMsg)
-		errMsg 	= fmt.Sprintf("    details: %s\n\t%s\t%s",
+		errMsg = fmt.Sprintf("    details: %s\n\t%s\t%s",
 			accessToken[0],
-			jobID, 
-			a.Config.GEFAddress);
-		log.Println(errMsg)		
+			jobID,
+			a.Config.GEFAddress)
+		log.Println(errMsg)
 		http.Error(w, errMsg, 500)
-		return		
+		return
 	}
 
 	outputBuf, err := utils.ReadOutputFile(outputFileLink)
@@ -310,8 +318,8 @@ func (a *App) JobStart(w http.ResponseWriter, r *http.Request) {
 		Response{w}.ServerError("Error while reading the output file", err)
 		errMsg := "Error while reading the output file"
 		log.Println(errMsg)
-		errMsg 	= fmt.Sprintf("    details: %s\n", outputFileLink);
-		log.Println(errMsg)				
+		errMsg = fmt.Sprintf("    details: %s\n", outputFileLink)
+		log.Println(errMsg)
 		http.Error(w, errMsg, 500)
 		return
 	}
