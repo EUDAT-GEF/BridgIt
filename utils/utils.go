@@ -103,6 +103,8 @@ func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, 
 
 	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
+	log.Print("REPLY")
+	log.Print(resp.Body)
 	if err != nil {
 		return 1, Err(err, "Failed to parse the GEF server reply")
 	}
@@ -121,14 +123,16 @@ func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (str
 
 	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
+	log.Print("Reply")
+	log.Print(resp.Body)
 	if err != nil {
 		return "", Err(err, "Failed to parse the GEF server reply")
 	}
 
-	return jsonReply.Job.OutputVolume, nil
+	return jsonReply.Job.OutputVolume[0].VolumeID, nil
 }
 
-// GetVolumeFile inspects the output volume and return a path to the output file
+// GetVolumeFileName inspects the output volume and return a path to the output file
 func GetVolumeFileName(accessToken string, volumeID string, GEFAddress string) (string, error) {
 	log.Println("Reading the output volume " + volumeID)
 	resp, err := TLSHTTPRequest("GET", GEFAddress+"/api/volumes/"+volumeID+"/?access_token="+accessToken, nil)
@@ -149,7 +153,7 @@ func GetVolumeFileName(accessToken string, volumeID string, GEFAddress string) (
 	}
 }
 
-// GetOutputFile returns a link to the first file (Weblicht service will always produce only one file) from the output volume
+// GetOutputFileURL returns a link to the first file (Weblicht service will always produce only one file) from the output volume
 func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (string, error) {
 	log.Println("Retrieving a link to the output file from the job " + jobID)
 	for {
@@ -162,7 +166,7 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-
+	log.Print("GEtting output volume")
 	volumeID, err := GetOutputVolumeID(accessToken, jobID, GEFAddress)
 	if err != nil {
 		return "", err
@@ -172,7 +176,8 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 	if err != nil {
 		return "", err
 	}
-
+	log.Print("Reply")
+	log.Print(GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken)
 	return GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken, nil
 }
 

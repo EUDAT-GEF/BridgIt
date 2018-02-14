@@ -129,7 +129,7 @@ func jmap(kv ...interface{}) map[string]interface{} {
 
 // NewApp creates a Bridgit application object (with config and server information) to initialize a service
 func NewApp(cfg def.Configuration) App {
-	log.Println("Preparing to start the service at port " + cfg.PortNumber)
+	log.Println("Preparing to start BridgIt service at port " + cfg.PortNumber)
 	srv := &http.Server{Addr: ":" + cfg.PortNumber}
 
 	application := App{
@@ -218,12 +218,11 @@ func (a *App) TestJobInspect(w http.ResponseWriter, r *http.Request) {
 		ID:           jobID,
 		ConnectionID: 1,
 		ServiceID:    "serviceID string",
-		Input:        "input URL",
 		Created:      time.Now(),
 		Duration:     10,
 		State:        &def.JobState{Code: 0, Status: "Done", Error: ""},
-		InputVolume:  "InputVolume",
-		OutputVolume: "OutputVolume",
+		InputVolume:  []def.JobVolume{},
+		OutputVolume: []def.JobVolume{},
 		Tasks:        []def.Task{},
 	}
 
