@@ -234,7 +234,8 @@ func (a *App) TestVolumeInspect(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	var volumeFiles []def.VolumeItem
 	outputFile := def.VolumeItem{Name: "results.txt", Size: 50, Modified: time.Now(), IsFolder: false, Path: "", FolderTree: []def.VolumeItem{}}
-
+	log.Print("Volume ID")
+	log.Print(vars["volumeID"])
 	volumeFiles = append(volumeFiles, outputFile)
 	Response{w}.Ok(jmap("volumeID", vars["volumeID"], "volumeContent", volumeFiles))
 }

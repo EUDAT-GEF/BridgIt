@@ -128,8 +128,12 @@ func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (str
 	if err != nil {
 		return "", Err(err, "Failed to parse the GEF server reply")
 	}
-
-	return jsonReply.Job.OutputVolume[0].VolumeID, nil
+	log.Print(jsonReply.Job.OutputVolume)
+	if len(jsonReply.Job.OutputVolume) > 0 {
+		return jsonReply.Job.OutputVolume[0].VolumeID, nil
+	} else {
+		return "", nil
+	}
 }
 
 // GetVolumeFileName inspects the output volume and return a path to the output file
@@ -172,25 +176,31 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 		return "", err
 	}
 
-	fileName, err := GetVolumeFileName(accessToken, volumeID, GEFAddress)
-	if err != nil {
-		return "", err
+	if volumeID != "" {
+		fileName, err := GetVolumeFileName(accessToken, volumeID, GEFAddress)
+		if err != nil {
+			return "", err
+		}
+		log.Print("Reply")
+		log.Print(GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken)
+		return GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken, nil
 	}
-	log.Print("Reply")
-	log.Print(GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken)
-	return GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken, nil
+	return "", nil
 }
 
 // ReadOutputFile reads a file from a certain URL
 func ReadOutputFile(fileURL string) ([]byte, error) {
-	log.Println("Reading the output file: " + fileURL)
-	resp, err := TLSHTTPRequest("GET", fileURL, nil)
-	if err != nil {
-		return nil, Err(err, "Could not access the output file %s", fileURL)
-	}
-	outputBuf, err := ioutil.ReadAll(resp.Body)
+	if fileURL != "" {
+		log.Println("Reading the output file: " + fileURL)
+		resp, err := TLSHTTPRequest("GET", fileURL, nil)
+		if err != nil {
+			return nil, Err(err, "Could not access the output file %s", fileURL)
+		}
+		outputBuf, err := ioutil.ReadAll(resp.Body)
 
-	return outputBuf, err
+		return outputBuf, err
+	}
+	return nil, nil
 }
 
 func Logger(inner http.Handler, name string) http.Handler {
