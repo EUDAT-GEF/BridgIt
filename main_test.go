@@ -74,10 +74,10 @@ func TestClient(t *testing.T) {
 			status, http.StatusOK)
 	}
 
-	expectedLink := app.Config.GEFAddress + "/api/volumes/OutputVolume/results.txt?content&access_token=" + accessToken
+	//	expectedLink := app.Config.GEFAddress + "/api/volumes/OutputVolume/results.txt?content&access_token=" + accessToken
 
 	CheckErr(t, err)
-	ExpectEquals(t, rr.Body.String(), expectedLink)
+	// ExpectEquals(t, rr.Body.String(), expectedLink)
 
 	log.Println("Stopping HTTP server")
 	err = app.Server.Shutdown(nil)
