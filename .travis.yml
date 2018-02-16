@@ -5,6 +5,8 @@ language: go
 before_install:
   - echo ${TRAVIS_BUILD_DIR}
   - echo ${GOPATH}
+  - curl https://glide.sh/get | sh
 
 script:
+  - glide install
   - go test
