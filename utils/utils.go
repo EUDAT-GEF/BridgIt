@@ -103,8 +103,7 @@ func GetJobStateCode(accessToken string, jobID string, GEFAddress string) (int, 
 
 	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
-	log.Print("REPLY")
-	log.Print(resp.Body)
+
 	if err != nil {
 		return 1, Err(err, "Failed to parse the GEF server reply")
 	}
@@ -123,8 +122,7 @@ func GetOutputVolumeID(accessToken string, jobID string, GEFAddress string) (str
 
 	var jsonReply def.SelectedJob
 	err = json.NewDecoder(resp.Body).Decode(&jsonReply)
-	log.Print("Reply")
-	log.Print(resp.Body)
+
 	if err != nil {
 		return "", Err(err, "Failed to parse the GEF server reply")
 	}
@@ -170,7 +168,7 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
-	log.Print("GEtting output volume")
+
 	volumeID, err := GetOutputVolumeID(accessToken, jobID, GEFAddress)
 	if err != nil {
 		return "", err
@@ -181,8 +179,7 @@ func GetOutputFileURL(accessToken string, jobID string, GEFAddress string) (stri
 		if err != nil {
 			return "", err
 		}
-		log.Print("Reply")
-		log.Print(GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken)
+
 		return GEFAddress + "/api/volumes/" + fileName + "?content&access_token=" + accessToken, nil
 	}
 	return "", nil
